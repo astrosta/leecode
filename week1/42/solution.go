@@ -1,42 +1,62 @@
 package _2
 
 func trap(height []int) int {
+	stack := newStack()
+	var water int
 
-	if len(height) == 0 {
-		return 0
-	}
-	left, right := 0, len(height)-1
-	ans := 0
-	maxLeft := height[left]
-	maxRight := height[right]
-	for left < right {
-		if height[left] > height[right] {
-			right--
-			if height[right] < min(maxLeft, maxRight) {
-				ans += min(maxLeft, maxRight) - height[right]
+	for index, value := range height {
+		top := stack.top()
+
+		for !stack.isEmpity() && height[top] < value {
+			stack.pop()
+
+			if stack.isEmpity() {
+				break
 			}
-			maxRight = max(maxRight, height[right])
-		} else {
-			left++
-			if height[left] < min(maxLeft, maxRight) {
-				ans += min(maxLeft, maxRight) - height[left]
+
+			cur := stack.top()
+			if height[cur] < value {
+				water += (index - cur - 1) * (height[cur] - height[top])
+			} else {
+				water += (index - cur - 1) * (value - height[top])
 			}
-			maxLeft = max(maxLeft, height[left])
+			top = cur
 		}
 
+		stack.push(index)
 	}
-	return ans
+
+	return water
 }
 
-func min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
+type stack struct {
+	array []int
 }
-func max(a, b int) int {
-	if a < b {
-		return b
+
+func newStack() *stack {
+	return &stack{
+		array: []int{},
 	}
-	return a
+}
+
+func (s *stack) top() int {
+	if s.isEmpity() {
+		return -1
+	}
+
+	return s.array[len(s.array)-1]
+}
+
+func (s *stack) pop() {
+	s.array = s.array[:len(s.array)-1]
+	return
+}
+
+func (s *stack) push(e int) {
+	s.array = append(s.array, e)
+	return
+}
+
+func (s *stack) isEmpity() bool {
+	return len(s.array) == 0
 }
